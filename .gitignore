@@ -1,0 +1,3 @@
+# R related files
+*.RData
+*.Rhistory

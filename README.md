@@ -53,5 +53,5 @@ Sans précision, ce script comparera les différentes données obtenues à celle
 
 ## References
 <a id="1">[1]</a> 
-[Subramanian et al. 2022](https://academic.oup.com/mbe/article/39/8/msac157/6647594?login=false). 
+Krishnamurthy Subramanian, Bryan Payne, Felix Feyertag, David Alvarez-Ponce, The Codon Statistics Database: A Database of Codon Usage Bias, Molecular Biology and Evolution, Volume 39, Issue 8, August 2022, msac157, [https://doi.org/10.1093/molbev/msac157](https://doi.org/10.1093/molbev/msac157). 
 
