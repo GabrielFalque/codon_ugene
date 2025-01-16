@@ -37,7 +37,7 @@ option_list <- list(
   make_option(c("-d", "--dir"), type = "character", default = NULL,
               help = paste0("Directory with gene sequences (mandatory).\n", 
               "Files must be named like gene_{gene_name}.fasta with gene_name", 
-              " being Orf1 for example. (Ex : gene_Orf1.fasta"), 
+              " being Orf1 for example. (Ex : gene_Orf1.fasta)"), 
               metavar = "DIR"),
   make_option(c("-o", "--outdir"), type = "character", default = NULL,
               help = "Directory where to store output files (mandatory).", 
