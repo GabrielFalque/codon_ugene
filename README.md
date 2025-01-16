@@ -5,7 +5,7 @@ An R script for analysing codon usage. It calculates, for each gene, the Relativ
 
 It also performs a Correspondence Analysis (CA) on the RSCU values.
 
-## Installation et Preparation
+## Installation and Preparation
 1. **Clone this repo** :
 ```bash
 git clone https://github.com/GabrielFalque/codon_ugene.git
@@ -61,6 +61,10 @@ Personally, I use complete virus genome sequences. I choose a reference genome (
 python ./extract_genes_aln.py --ref_file virus_annotated_genes.txt --aligned_file complete_genome_sequences.mafft.fasta --seq_id seq1 --output_directory my/results/
 ```
 with `--seq_id seq1` specifying the name of the sequence in my fasta file from which I took the annotation file *virus_annotated_genes.txt* from NCBI.
+
+## Outputs
+
+
 
 ## References
 <a id="1">[1]</a> 
