@@ -35,13 +35,20 @@ data_directory = paste0(this.dir(), "/data/")
 # Définir les options en ligne de commande
 option_list <- list(
   make_option(c("-d", "--dir"), type = "character", default = NULL,
-              help = "Directory with aligned gene sequences (mandatory). 
-              Files must be named like gene_{gene_name}.fasta with gene_name being Orf1 for example.", 
+              help = paste0("Directory with gene sequences (mandatory).\n", 
+              "Files must be named like gene_{gene_name}.fasta with gene_name", 
+              " being Orf1 for example. (Ex : gene_Orf1.fasta"), 
               metavar = "DIR"),
   make_option(c("-o", "--outdir"), type = "character", default = NULL,
-              help = "Directory where to store output files (mandatory).", metavar = "OUTDIR"),
-  make_option(c("-r", "--ref"), type = "character", default = paste0(data_directory, "human_codon_usage.csv"),
-              help = "Species codon usage CSV (by default : 'human_codon_usage.csv').", metavar = "FILE"),
+              help = "Directory where to store output files (mandatory).", 
+              metavar = "OUTDIR"),
+  make_option(c("-r", "--ref"), type = "character", 
+              default = paste0(data_directory, "human_codon_usage.csv"),
+              help = paste0("Species codon usage CSV (by default :",
+                            "'human_codon_usage.csv'). \nYou can download RSCU",
+                            " table from the desired species directly from",
+                            " http://codonstatsdb.unr.edu/index.html."), 
+              metavar = "FILE"),
   make_option(c("--cov"), action = "store_true", default = FALSE,
               help = "If the sequences are from SARS-CoV-2."),
   make_option(c("--verbose"), action = "store_true", default = FALSE,
@@ -306,7 +313,8 @@ validate_csv <- function(file_path, verbose=FALSE) {
   required_columns <- c("CODON", "Amino.acid", "Fraction")
   missing_columns <- setdiff(required_columns, colnames(data))
   if (length(missing_columns) > 0) {
-    stop(paste("Error : Following columns are missing :", paste(missing_columns, collapse = ", ")))
+    stop(paste("Error : Following columns are missing :", 
+               paste(missing_columns, collapse = ", ")))
   }
   
   # Vérifier que tous les codons sont répertoriés (64 codons)
@@ -329,7 +337,10 @@ validate_csv <- function(file_path, verbose=FALSE) {
   
   # Arrêter l'exécution si des problèmes de type de données sont détectés
   if (length(issues) > 0) {
-    stop(paste("Error : Detected issues in data types :\n", paste(issues, collapse = "\n")))
+    stop(paste("Error : Detected issues in data types :\n", 
+               paste(issues, collapse = "\n"),
+               "\n You can download RSCU table from the desired species",
+               "directly from http://codonstatsdb.unr.edu/index.html."))
   }
   
   # Si tout est correct
