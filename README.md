@@ -41,6 +41,10 @@ You can download RSCU table from the desired species directly from http://codons
 
 	--cov
 		If the sequences are from SARS-CoV-2.
+		
+	-t INTEGER, --threads=INTEGER
+		Number of threads.
+
 
 	--verbose
 		Verbose mode.
@@ -64,7 +68,74 @@ with `--seq_id seq1` specifying the name of the sequence in my fasta file from w
 
 ## Outputs
 
+The script will produce the following outputs :
 
+### RSCU and features value computation
+
+Produces "*total_matrix.csv*" file in outdir with all features computed per sequence. Following features for all sequences of all genes are present in total_matrix :
+ - RSCU
+ - GC (%)
+ - GC1 (%)
+ - GC2 (%)
+ - GC3 (%)
+ - GC12 (%)
+ - RCDI
+ - ENC
+ - CAI
+ - Dinucleotides frequency
+ - Nucleotides frequency
+ - Aromatic amino acids frequency
+ - GRAVY score
+ 
+ Also produces "*rscu_with_ref.csv*" with RSCU values for each gene and for reference species genome.
+
+### Dinucleotides relative abundance 
+
+Produces "*ratio_dinuc_freq_df.csv*" file in outdir with Dinucleotides relative abundance per sequence.
+
+### Features mean value per gene
+
+Produces "*gene_features_mean.csv*" file in outdir with mean values per gene for the following features :
+ - gc1
+ - gc2
+ - gc3
+ - gc12
+ - rcdi
+ - enc
+ - cai
+ - gc
+ - aromatic_prct
+ - gravy
+
+### Correspondence Analysis (CA) on RSCU values
+
+Computes Correspondence Analysis (CA) on RSCU values from all sequences. It produces two CSV file in outdir :
+ - "*correlation_features_dimensions.csv*" : correlation between every feature and the two first CA dimensions along with p-value.
+ - "*significant_features_correlations.csv*" : correlation between every pair of features for which p-value < 0.05 (significant).
+It also produces 4 plots :
+ - "*ca_clustered.svg*" : chart of CA with points colored by gene so it is possible to see different clusters.
+ - "*variance_explained.svg*" : plots how variance is explained by the 10 first dimensions
+ - "*top10_dim1.svg*" and "*top10_dim2.svg*" : plot variables contribution to the first 2 dimensions.
+ 
+### RSCU distribution plots
+
+One plot per gene is produced; each plot shows RSCU distribution for each codon, grouped by amino acid. For each amino acid, the preferred codon is colored in red. Each file is named "*RSCU_distribution_*{gene_name}*.png*".
+
+### GCs content plots
+
+Produces "*gc_plot.svg*" file showing GC, GC1, GC12, GC2 and GC3 content percentage for each gene.
+
+### ENC plot
+
+Produces "*enc_plot.svg*" file which is a graph used to analyse codon usage bias in genetic sequences. It represents the ENC (effective number of codons) as a function of the GC3 (G and C content at the third codon position).  The green dotted theoretical curve shows the expected relationship between ENC and GC3 if codon usage is determined solely by mutational bias and without selection pressure. It serves as a reference for evaluating the experimental data.
+
+### Neutrality plot 
+
+Produces "*neutrality_plot.svg*" file which is a graph used to analyse the relative influence of natural selection and mutations on codon usage bias. It generally represents GC1+2 (G and C content in the first and second codon positions) as a function of GC3 (G and C content in the third codon position).
+
+### Dinucleotides relative abundance plot
+
+Produces a "*oe_dinuc_freq_plot.svg*" which shows relative abundance (computed as (*observed frequency of dinucleotide*)/(*expected frequency*)) of each dinucleotide. Points are colored by gene.
 
 ## References
 <a id="1">[1]</a> 
