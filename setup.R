@@ -4,14 +4,14 @@
 
 cat("Checking required R packages...\n")
 
-# Liste des librairies nécessaires
+# List of required libraries
 required_packages <- c(
-  "cubar", "Biostrings", "ggplot2", "coRdon", "seqinr", "stringr", "tidyverse",
-  "ca", "Peptides", "FactoMineR", "factoextra", "vegan", "reshape2",
-  "AnaCoDa", "dplyr", "svglite", "optparse", "here", "this.path"
+  "cubar", "Biostrings", "ggplot2", "coRdon", "tidyverse", "seqinr",
+  "Peptides", "vegan", "dplyr", "optparse", "this.path", "tictoc", "ggtext", 
+  "parallel", "future", "future.apply"
 )
 
-# Installer les packages manquants
+# Install missing libraries
 install_if_missing <- function(packages) {
   new_packages <- packages[!(packages %in% installed.packages()[, "Package"])]
   if (length(new_packages)) {
