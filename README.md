@@ -60,7 +60,7 @@ Without precision, this script will compare the different data obtained to that 
 
 ### Gene sequences preparation
 
-Personally, I use complete virus genome sequences. I choose a reference genome (one with the fewest missing parts and ambiguous nucleotides), and retrieve its annotated gene file from __[NCBI](https://www.ncbi.nlm.nih.gov/)__ [[2]](#2)). I align my sequences (via __[MAFFT](https://mafft.cbrc.jp/alignment/server/index.html)__ [[3]](#3)) for example). Then I separate my alignment by gene. To do this I use a *python* script (which I'll put on my github soon) such as :
+Personally, I use complete virus genome sequences. I choose a reference genome (one with the fewest missing parts and ambiguous nucleotides), and retrieve its annotated gene file from __[NCBI](https://www.ncbi.nlm.nih.gov/)__ [[2]](#2)). I align my sequences (via __[MAFFT](https://mafft.cbrc.jp/alignment/server/index.html)__ [[3]](#3)) for example). Then I separate my alignment by gene. To do this I use a *python* script (the script is available on __[this repo](https://github.com/GabrielFalque/fasta_tools)__ under the name of *extract_genes_aln.py*) such as :
 ```bash
 python ./extract_genes_aln.py --ref_file virus_annotated_genes.txt --aligned_file complete_genome_sequences.mafft.fasta --seq_id seq1 --output_directory my/results/
 ```
