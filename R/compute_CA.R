@@ -28,7 +28,7 @@ compute_genes_CA <- function(total_matrix, gene_color_map, ca_output_repo){
   # Correspondence Analysis (CA)
   res_cca <- cca(wanted_data)
 
-  # Get points score (sites) and variables (species)
+    # Get points score (sites) and variables (species)
   points_scores <- as.data.frame(scores(res_cca, display = "sites"))
   variables_scores <- as.data.frame(scores(res_cca, display = "species"))
   
@@ -164,16 +164,35 @@ compute_genes_CA <- function(total_matrix, gene_color_map, ca_output_repo){
     list(correlation = result$estimate, p_value = result$p.value)
   }
   
+  warning_count <- 0
+
   # Loop to compute correlation between each variable and each dimension
   for (var_name in colnames(numeric_vars)) {
     var_data <- numeric_vars[[var_name]]
     
-    # Correlation with Dim1
-    cor_dim1 <- get_cor_and_pval(var_data, obs_scores[, 1])
+    # Capture warnings
+    withCallingHandlers({
+      # Correlation with Dim1
+      cor_dim1 <- get_cor_and_pval(var_data, obs_scores[, 1])
+    }, warning = function(w) {
+      if (grepl("l'écart type est nul", conditionMessage(w))) {
+        warning_count <- warning_count + 1
+        invokeRestart("muffleWarning")  # Avoid warning display
+      }
+    })
     
-    # Correlation with Dim2
-    cor_dim2 <- get_cor_and_pval(var_data, obs_scores[, 2])
     
+    # Capture warnings
+    withCallingHandlers({
+      # Correlation with Dim2
+      cor_dim2 <- get_cor_and_pval(var_data, obs_scores[, 2])
+    }, warning = function(w) {
+      if (grepl("l'écart type est nul", conditionMessage(w))) {
+        warning_count <<- warning_count + 1
+        invokeRestart("muffleWarning")  # Avoid warning display
+      }
+    })
+
     # Add results to the list
     cor_results[[var_name]] <- c(
       Correlation_Dim1 = cor_dim1$correlation,
@@ -181,6 +200,11 @@ compute_genes_CA <- function(total_matrix, gene_color_map, ca_output_repo){
       Correlation_Dim2 = cor_dim2$correlation,
       P_Value_Dim2 = cor_dim2$p_value
     )
+  }
+  
+  # Display the final message if warnings have been captured.
+  if (warning_count > 0) {
+    message(sprintf("Standard deviation is null for computation of correlation between each variable and each dimension in %d cases.", warning_count))
   }
   
   # Convert results to dataframe
@@ -198,11 +222,22 @@ compute_genes_CA <- function(total_matrix, gene_color_map, ca_output_repo){
       stringsAsFactors = FALSE
     )
     
+    warning_count <- 0
+    
     for (i in 1:(ncol(data) - 1)) {
       for (j in (i + 1):ncol(data)) {
         x <- data[[i]]
         y <- data[[j]]
-        test <- cor.test(x, y, method = "pearson")
+        # Capture warnings
+        withCallingHandlers({
+          test <- cor.test(x, y, method = "pearson")
+        }, warning = function(w) {
+          if (grepl("l'écart type est nul", conditionMessage(w))) {
+            warning_count <<- warning_count + 1
+            invokeRestart("muffleWarning")  # Avoid warning display
+          }
+        })
+        
         results <- rbind(results, data.frame(
           var1 = vars[i],
           var2 = vars[j],
@@ -210,6 +245,11 @@ compute_genes_CA <- function(total_matrix, gene_color_map, ca_output_repo){
           p_value = test$p.value
         ))
       }
+    }
+    # Display the final message if warnings have been captured.
+    
+    if (warning_count > 0) {
+      message(sprintf("Standard deviation is null for computation of correlation between features in %d cases.", warning_count))
     }
     return(results)
   }

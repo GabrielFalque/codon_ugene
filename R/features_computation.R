@@ -249,9 +249,12 @@ gene_sequences_features_computation <- function(
 
   # get codon frequency
   gene_sequences_cf <- cubar::count_codons(gene_sequences, as.prob = TRUE)
-
+  #print(gene)
+  #print(gene_sequences)
   # get ENC
+  #print("A")
   codon_data <- coRdon::codonTable(gene_sequences)
+  #print("B")
   enc<- coRdon::ENC(codon_data)
   enc_matrix <- matrix(unlist(enc), ncol = length(enc), byrow = TRUE)
   rownames(enc_matrix) <- c("enc")

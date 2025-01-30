@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-
+options(warn=1)
 if (!requireNamespace("BiocManager", quietly=TRUE))
   install.packages("BiocManager")
 
@@ -51,6 +51,9 @@ option_list <- list(
                             " http://codonstatsdb.unr.edu/index.html."), 
               metavar = "FILE"),
   
+  make_option(c("--no_complete"), action = "store_true", default = FALSE,
+              help = "If you want to remove complete genome CDS computation."),
+  
   make_option(c("--cov"), action = "store_true", default = FALSE,
               help = "If the sequences are from SARS-CoV-2."),
   
@@ -100,6 +103,17 @@ if (!n_threads %% 1 == 0){
 }
 n_threads <- min(n_threads, detectCores() - 1)
 
+
+
+# Indicate if --no_complete option is activated
+if (opt$no_complete) {
+  message("Option --no_complete activated. No complete genome CDS codon analysis will be performed.\n")
+} else {
+  if (opt$verbose){
+    message("Option --no_complete non activated. Complete CDS codon analysis will be performed (by default).\n")
+  }
+}
+
 # Indicate if --cov option is activated
 if (opt$cov) {
   message("Option --cov activated. Sequences are from SARS-CoV-2.\n")
@@ -119,51 +133,64 @@ if (opt$verbose) message("Loading species codon usage file : ", codon_usage_ref_
 genes_sequences_list <- list()
 for (file in fasta_files) {
   
-  gene_name <- sub("^gene_(.*)\\.fasta$", "\\1", basename(file))  # Extract genes name
-  if (opt$verbose) message("Reading gene : ", gene_name)
+  # Extract genes name
+  gene_name <- sub("^gene_(.*)\\.fasta$", "\\1", basename(file))
   
-  if (opt$cov && gene_name=="ORF1ab"){
-    # separate ORF1ab gene into ORF1a and ORF1b
-    ORF1ab_sequences <- readDNAStringSet(file)
+  if (opt$verbose) message("Reading gene : ", gene_name)
     
-    raw_ORF1a_sequences <- subseq(ORF1ab_sequences, start = 1, end = 13203)
-    raw_ORF1b_sequences <- subseq(ORF1ab_sequences, start = 13203)
-    
-    # Remove gaps if input file is an Multiple Alignement Sequences (MSA)
-    nogap_ORF1a_sequences<- DNAStringSet(sapply(
-      raw_ORF1a_sequences, function(x) gsub("-", "", as.character(x))
-    ))
-    
-    # Does not check for STOP codons 
-    genes_sequences_list[["ORF1a"]] <- check_cds(
-      nogap_ORF1a_sequences,
-      check_len = TRUE,
-      check_start = TRUE,
-      check_stop = FALSE,
-      check_istop = TRUE,
-      rm_start = TRUE,
-      rm_stop = FALSE,
-    )
-    
-    # Remove gaps if input file is an MSA
-    nogap_ORF1b_sequences <- DNAStringSet(sapply(
-      raw_ORF1b_sequences, function(x) gsub("-", "", as.character(x))
-    ))
-    
-    # Does not check for START codons 
-    genes_sequences_list[["ORF1b"]] <- check_cds(
-      nogap_ORF1b_sequences,
-      check_len = TRUE,
-      check_start = FALSE,
-      check_stop = TRUE,
-      check_istop = TRUE,
-      rm_start = FALSE,
-      rm_stop = TRUE,
-    )
+    if (opt$cov && grepl("ORF1a", gene_name, fixed = TRUE)){ 
+      
+      raw_ORF1a_sequences <- readDNAStringSet(file)
+      ORF1a_sequences <- raw_ORF1a_sequences[
+        names(raw_ORF1a_sequences) != "NC_045512.2"]
+      
+      # Remove gaps if input file is an Multiple Alignement Sequences (MSA)
+      nogap_ORF1a_sequences<- DNAStringSet(sapply(
+        ORF1a_sequences, function(x) gsub("-", "", as.character(x))
+      ))
+      
+      # Does not check for STOP codons 
+      ORF1a_gene_name <- gene_name
+      sequence_temp <- check_cds(
+        nogap_ORF1a_sequences,
+        check_len = TRUE,
+        check_start = TRUE,
+        check_stop = FALSE,
+        check_istop = TRUE,
+        rm_start = TRUE,
+        rm_stop = FALSE,
+      )
+      
+      genes_sequences_list[[ORF1a_gene_name]] <- sequence_temp
+      
+    } else if (opt$cov && grepl("ORF1b", gene_name, fixed = TRUE)) {
+      
+      # separate ORF1ab gene into ORF1a and ORF1b
+      raw_ORF1b_sequences <- readDNAStringSet(file)
+      ORF1b_sequences <- raw_ORF1b_sequences[
+        names(raw_ORF1b_sequences) != "NC_045512.2"]
+      
+      # Remove gaps if input file is an MSA
+      nogap_ORF1b_sequences <- DNAStringSet(sapply(
+        raw_ORF1b_sequences, function(x) gsub("-", "", as.character(x))
+      ))
+      
+      ORF1b_gene_name <- gene_name
+      # Does not check for START codons 
+      genes_sequences_list[[ORF1b_gene_name]] <- check_cds(
+        nogap_ORF1b_sequences,
+        check_len = TRUE,
+        check_start = FALSE,
+        check_stop = TRUE,
+        check_istop = TRUE,
+        rm_start = FALSE,
+        rm_stop = TRUE,
+      )
     
   } else {
     # Get gene sequences from file as DNAStringSet 
     raw_gene_sequences <- readDNAStringSet(file)
+    raw_gene_sequences <- raw_gene_sequences[names(raw_gene_sequences) != "NC_045512.2"]
     nogap_gene_sequences <- DNAStringSet(sapply(
       raw_gene_sequences, function(x) gsub("-", "", as.character(x))
     ))
@@ -191,7 +218,8 @@ ref_codon_weights <- ref_codons_infos_list$ref_codon_weights
 # Bad sequences (>15% ambiguious nucleotides) removal and complete genomes 
 # selection.
 cat("Data cleaning...")
-all_gene_sequences <- data_cleaning(genes_sequences_list)
+all_gene_sequences <- data_cleaning(genes_sequences_list,
+                                    opt$no_complete)
 cat("Done !\n")
 
 # ---- RSCU and features value computation ----
@@ -238,8 +266,12 @@ cat("Done !\n")
 # Get unique gene names
 unique_genes <- unique(total_matrix$gene)
 
-# Reorder to put ‘complete’ first
-gene_list <- unique_genes[order(unique_genes != "complete", unique_genes)] 
+if (!opt$no_complete){
+  # Reorder to put ‘complete’ first
+  gene_list <- unique_genes[order(unique_genes != "complete", unique_genes)]
+} else {
+  gene_list <- unique_genes
+}
 
 # Associate unique color to each gene
 # Use color palette from ggplot2
@@ -277,7 +309,7 @@ gene_features_mean <- compute_gene_features_mean(
 )
 
 # ---- CA computation ----
-# Computes Correspondance Analysis (CA) on RSCU values from all sequences.
+# Computes Correspondence Analysis (CA) on RSCU values from all sequences.
 # Creates chart of CA with points colored by gene so it is possible to see
 # different clusters. It also plots variables contribution to the first 2 
 # dimensions. And plots how variance is explained by the 10 first dimensions.

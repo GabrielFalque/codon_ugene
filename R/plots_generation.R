@@ -178,7 +178,7 @@ get_enc_plot <- function(total_matrix, gene_color_map, enc_plot_repo){
     geom_line(stat='function', fun=enc_curv, color='green', 
               linetype='dashed', linewidth=1) +
     xlim(0, 1) +
-    ylim(enc_min - 10, max(c(enc_min, 70)) + 10)+
+    ylim(enc_min - 10, min(c(enc_max, 70)) + 10)+
     labs(title = "ENC Plot",
          x = "GC3 Content",
          y = "Effective Number of Codons (ENC)",
@@ -309,14 +309,15 @@ plots_generation <- function(
 
   # Produces and save ENC plot : shows ENC as a function of GC3. 
   # Points colored by gene.
+  options(warn = -1) 
   enc_plot <- get_enc_plot(total_matrix, gene_color_map, outdir)
-
+  options(warn = 1)
   # ---- Neutrality Plot ----
 
   # generate Neutrality plot : shows GC12 content as a function of GC3 content.
   neutrality_plot <- get_neutrality_plot(total_matrix, gene_color_map, outdir)
 
-  # ---- Dinucleotides relative abundance Plot ----
+    # ---- Dinucleotides relative abundance Plot ----
 
   # Dinucleotides relative abundance plot : shows relative abundance (computed
   # as (observed frequency of dinucleotide)/(expected frequency)) of each

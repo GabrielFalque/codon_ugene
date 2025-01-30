@@ -28,10 +28,10 @@ install_and_load <- function(packages) {
 
 bioc_packages <- c("Biostrings", "cubar", "coRdon")
 cran_packages <- setdiff(required_packages, bioc_packages)
-
+options(warn = -1) 
 # Install and load CRAN libraries
 install_and_load(cran_packages)
-
+options(warn = 1) 
 # Install and load Bioconductor libraries
 missing_bioc <- bioc_packages[!sapply(bioc_packages, requireNamespace, quietly = TRUE)]
 if (length(missing_bioc) > 0) {

@@ -42,6 +42,9 @@ You can download RSCU table from the desired species directly from http://codons
 	--cov
 		If the sequences are from SARS-CoV-2.
 		
+	--no_complete
+		If you want to remove complete genome CDS computation.
+		
 	-t INTEGER, --threads=INTEGER
 		Number of threads.
 
